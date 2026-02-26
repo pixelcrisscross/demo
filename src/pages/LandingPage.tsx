@@ -34,8 +34,10 @@ export const LandingPage: React.FC = () => {
         {/* Spline Background */}
         <div className="absolute inset-0 z-0">
           <Suspense fallback={<div className="w-full h-full bg-black animate-pulse" />}>
-            <Spline 
-              scene="https://prod.spline.design/Z9TXn2mrWvQ4b0op/scene.splinecode" 
+            {/* @ts-ignore */}
+            <spline-viewer 
+              url="https://prod.spline.design/Z9TXn2mrWvQ4b0op/scene.splinecode" 
+              events-target="global"
             />
           </Suspense>
           {/* Gradient overlay to fade Spline into black */}
@@ -107,7 +109,8 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
           <div className="relative h-[600px] rounded-[40px] overflow-hidden border border-white/10 bg-white/[0.02] group">
             <Suspense fallback={<div className="w-full h-full bg-white/5 animate-pulse" />}>
-              <Spline scene="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
+              {/* @ts-ignore */}
+              <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
             </Suspense>
             <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black via-transparent to-transparent" />
           </div>

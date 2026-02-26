@@ -76,7 +76,8 @@ export const StudentDashboard: React.FC = () => {
         {/* 3D Interactive Element */}
         <div className="absolute right-0 top-0 bottom-0 w-1/3 hidden lg:block pointer-events-auto">
           <Suspense fallback={<div className="w-full h-full bg-white/5 animate-pulse" />}>
-            <Spline scene="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
+            {/* @ts-ignore */}
+            <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
           </Suspense>
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/20 pointer-events-none" />
         </div>

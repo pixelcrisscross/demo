@@ -2,7 +2,6 @@ import React, { useState, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { GraduationCap, Briefcase, Building2, ArrowRight } from 'lucide-react';
-import Spline from '@splinetool/react-spline';
 import { Button } from '../components/UI';
 
 export const LoginPage: React.FC = () => {
@@ -22,65 +21,84 @@ export const LoginPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 relative overflow-hidden selection:bg-primary/30">
       {/* Background 3D */}
-      <div className="absolute inset-0 z-0 opacity-30">
+      <div className="absolute inset-0 z-0 opacity-40">
         <Suspense fallback={null}>
-          <Spline scene="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
+          {/* @ts-ignore */}
+          <spline-viewer 
+            url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" 
+            events-target="global"
+          />
         </Suspense>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black pointer-events-none" />
       </div>
 
-      <div className="max-w-4xl w-full grid md:grid-cols-2 gap-12 items-center relative z-10">
-        <div>
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-bold italic text-xl">N</div>
-            <span className="text-2xl font-black tracking-tighter text-primary">NEXUS<span className="text-text-primary">AI</span></span>
+      <div className="max-w-5xl w-full grid lg:grid-cols-2 gap-20 items-center relative z-10">
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="flex items-center gap-2 mb-12">
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-black font-bold italic text-xl">N</div>
+            <span className="text-2xl font-black tracking-tighter">NEXUS<span className="text-primary">AI</span></span>
           </div>
-          <h2 className="text-4xl font-black tracking-tight text-text-primary mb-4 leading-tight">
-            Welcome back to the <br />
-            <span className="text-primary">Nexus Ecosystem.</span>
+          <h2 className="text-6xl font-black tracking-tighter mb-6 leading-[0.9]">
+            YOUR PORTAL <br />
+            TO THE <span className="text-primary">FUTURE.</span>
           </h2>
-          <p className="text-text-muted text-lg">
-            Choose your portal to continue your journey.
+          <p className="text-white/40 text-xl leading-relaxed max-w-md">
+            Select your role to enter the Nexus ecosystem and start your journey.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="bg-card p-8 rounded-3xl card-shadow border border-border/50">
-          <div className="space-y-4 mb-8">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="bg-white/[0.03] backdrop-blur-3xl p-10 rounded-[40px] border border-white/10 shadow-2xl"
+        >
+          <div className="space-y-4 mb-10">
             {roles.map((role) => (
               <button
                 key={role.id}
                 onClick={() => setSelectedRole(role.id as any)}
-                className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 text-left ${
+                className={`w-full flex items-center gap-5 p-6 rounded-3xl border transition-all duration-300 text-left group ${
                   selectedRole === role.id 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-primary/30 hover:bg-gray-50'
+                    ? 'border-primary bg-primary/10 shadow-[0_0_30px_rgba(124,77,255,0.2)]' 
+                    : 'border-white/5 hover:border-white/20 hover:bg-white/[0.02]'
                 }`}
               >
-                <div className={`p-3 rounded-xl ${selectedRole === role.id ? 'bg-primary text-white' : 'bg-gray-100 text-text-muted'}`}>
-                  <role.icon size={24} />
+                <div className={`p-4 rounded-2xl transition-colors ${selectedRole === role.id ? 'bg-primary text-white' : 'bg-white/5 text-white/40 group-hover:text-white'}`}>
+                  <role.icon size={28} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-text-primary">{role.title}</h4>
-                  <p className="text-xs text-text-muted">{role.desc}</p>
+                  <h4 className={`font-bold text-lg transition-colors ${selectedRole === role.id ? 'text-white' : 'text-white/60 group-hover:text-white'}`}>{role.title}</h4>
+                  <p className="text-xs text-white/30 group-hover:text-white/40 transition-colors">{role.desc}</p>
                 </div>
               </button>
             ))}
           </div>
 
-          <Button 
-            size="lg" 
-            className="w-full" 
+          <button 
             disabled={!selectedRole}
             onClick={handleLogin}
+            className={`w-full py-5 rounded-full text-lg font-bold transition-all flex items-center justify-center gap-2 ${
+              selectedRole 
+                ? 'bg-white text-black hover:scale-[1.02] active:scale-[0.98]' 
+                : 'bg-white/5 text-white/20 cursor-not-allowed'
+            }`}
           >
-            Enter Portal <ArrowRight className="ml-2" size={20} />
-          </Button>
+            Enter Portal <ArrowRight size={20} />
+          </button>
 
-          <p className="text-center text-xs text-text-muted mt-6">
-            Don't have an account? <a href="#" className="text-primary font-bold hover:underline">Request Access</a>
-          </p>
-        </div>
+          <div className="mt-8 text-center">
+            <p className="text-xs text-white/20 font-medium">
+              Don't have an account? <a href="#" className="text-white hover:text-primary transition-colors">Request Access</a>
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

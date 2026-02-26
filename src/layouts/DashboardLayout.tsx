@@ -23,12 +23,14 @@ interface SidebarItemProps {
 const SidebarItem: React.FC<SidebarItemProps> = ({ icon: Icon, label, path, active }) => (
   <Link 
     to={path}
-    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-      active ? 'sidebar-active' : 'text-text-muted hover:bg-gray-100 hover:text-text-primary'
+    className={`flex items-center gap-3 px-5 py-4 rounded-2xl transition-all duration-300 group ${
+      active 
+        ? 'bg-primary/10 text-primary shadow-[0_0_20px_rgba(124,77,255,0.1)]' 
+        : 'text-white/40 hover:bg-white/5 hover:text-white'
     }`}
   >
-    <Icon size={20} className={active ? 'text-primary' : 'group-hover:text-primary'} />
-    <span className="font-medium">{label}</span>
+    <Icon size={20} className={active ? 'text-primary' : 'group-hover:text-primary transition-colors'} />
+    <span className="font-bold text-sm tracking-tight">{label}</span>
   </Link>
 );
 
@@ -57,15 +59,15 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-black text-white overflow-hidden selection:bg-primary/30">
       {/* Sidebar */}
-      <aside className="w-64 bg-card border-r border-border flex flex-col hidden lg:flex">
-        <div className="p-6 flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold italic">N</div>
-          <span className="text-xl font-black tracking-tighter text-primary">NEXUS<span className="text-text-primary">AI</span></span>
+      <aside className="w-72 bg-black border-r border-white/5 flex flex-col hidden lg:flex relative z-50">
+        <div className="p-8 flex items-center gap-3">
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-black font-bold italic">N</div>
+          <span className="text-xl font-black tracking-tighter">NEXUS<span className="text-primary">AI</span></span>
         </div>
 
-        <nav className="flex-1 px-4 py-4 space-y-1">
+        <nav className="flex-1 px-4 py-4 space-y-2">
           {menuItems[role as keyof typeof menuItems]?.map((item) => (
             <SidebarItem 
               key={item.path} 
@@ -75,58 +77,58 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
           ))}
         </nav>
 
-        <div className="p-4 border-t border-border">
+        <div className="p-6 border-t border-white/5">
           <SidebarItem icon={Settings} label="Settings" path={`/${role}/settings`} />
           <button 
             onClick={() => navigate('/')}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all duration-200 mt-1"
+            className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-red-400 hover:bg-red-400/10 transition-all duration-300 mt-2"
           >
             <LogOut size={20} />
-            <span className="font-medium">Logout</span>
+            <span className="font-bold text-sm tracking-tight">Logout</span>
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Header */}
-        <header className="h-16 bg-card border-b border-border px-6 flex items-center justify-between z-10">
-          <div className="flex items-center gap-4 flex-1">
-            <button className="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
+        <header className="h-20 bg-black/50 backdrop-blur-xl border-b border-white/5 px-8 flex items-center justify-between z-40">
+          <div className="flex items-center gap-6 flex-1">
+            <button className="lg:hidden p-2 hover:bg-white/5 rounded-xl">
               <Menu size={20} />
             </button>
-            <div className="relative max-w-md w-full hidden md:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
+            <div className="relative max-w-md w-full hidden md:block group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" size={18} />
               <input 
                 type="text" 
-                placeholder="Search jobs, students, or skills..." 
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
+                placeholder="Search Nexus Intelligence..." 
+                className="w-full pl-12 pr-6 py-3 bg-white/[0.03] border border-white/5 rounded-2xl focus:outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all text-sm font-medium"
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-text-muted hover:bg-gray-100 rounded-xl relative">
+          <div className="flex items-center gap-6">
+            <button className="p-3 text-white/40 hover:bg-white/5 hover:text-white rounded-2xl relative transition-all">
               <Bell size={20} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+              <span className="absolute top-3 right-3 w-2 h-2 bg-primary rounded-full shadow-[0_0_10px_rgba(124,77,255,1)]"></span>
             </button>
-            <div className="h-8 w-[1px] bg-border mx-2"></div>
-            <div className="flex items-center gap-3">
+            <div className="h-8 w-[1px] bg-white/5 mx-2"></div>
+            <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold leading-none">{mockUser.name}</p>
-                <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider mt-1">{role}</p>
+                <p className="text-sm font-black tracking-tight">{mockUser.name}</p>
+                <p className="text-[10px] text-primary uppercase font-black tracking-widest mt-1">{role}</p>
               </div>
               <img 
                 src={mockUser.avatar} 
                 alt="Profile" 
-                className="w-10 h-10 rounded-xl object-cover border-2 border-primary/20"
+                className="w-11 h-11 rounded-2xl object-cover border border-white/10 p-0.5"
               />
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto bg-black">
           {children}
         </div>
       </main>

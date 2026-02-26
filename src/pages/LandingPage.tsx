@@ -2,100 +2,135 @@ import React, { Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Sparkles, ArrowRight, Zap, Globe, Shield } from 'lucide-react';
-import Spline from '@splinetool/react-spline';
 import { Button } from '../components/UI';
 
 export const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-black text-white overflow-x-hidden selection:bg-primary/30">
       {/* Nav */}
-      <nav className="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center relative z-50">
+      <nav className="fixed top-0 left-0 right-0 z-[100] px-6 py-4 flex justify-between items-center backdrop-blur-md bg-black/20 border-b border-white/5">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-bold italic text-xl">N</div>
-          <span className="text-2xl font-black tracking-tighter text-primary">NEXUS<span className="text-text-primary">AI</span></span>
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-black font-bold italic text-lg">N</div>
+          <span className="text-xl font-black tracking-tighter">NEXUS<span className="text-primary">AI</span></span>
         </div>
-        <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-text-muted">
-          <a href="#" className="hover:text-primary transition-colors">Platform</a>
-          <a href="#" className="hover:text-primary transition-colors">Solutions</a>
-          <a href="#" className="hover:text-primary transition-colors">Resources</a>
-          <a href="#" className="hover:text-primary transition-colors">Pricing</a>
+        <div className="hidden md:flex items-center gap-10 text-[13px] font-medium text-white/60">
+          <a href="#" className="hover:text-white transition-colors">Platform</a>
+          <a href="#" className="hover:text-white transition-colors">Solutions</a>
+          <a href="#" className="hover:text-white transition-colors">Resources</a>
+          <a href="#" className="hover:text-white transition-colors">Pricing</a>
         </div>
-        <div className="flex items-center gap-4">
-          <Link to="/login" className="text-sm font-bold text-text-primary hover:text-primary">Login</Link>
-          <Button size="sm">Get Started</Button>
+        <div className="flex items-center gap-6">
+          <Link to="/login" className="text-[13px] font-semibold text-white/80 hover:text-white">Login</Link>
+          <button className="bg-white text-black px-5 py-2 rounded-full text-[13px] font-bold hover:bg-white/90 transition-all">
+            Get Started
+          </button>
         </div>
       </nav>
 
       {/* Hero */}
-      <section className="relative min-h-[90vh] flex items-center">
-        {/* Spline Background */}
-        <div className="absolute inset-0 z-0 opacity-80">
-          <Suspense fallback={<div className="w-full h-full bg-gray-50 animate-pulse" />}>
-            <Spline scene="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
+      <section className="relative min-h-screen flex flex-col items-center justify-center pt-20">
+        {/* Spline Background - Positioned at top like the reference image */}
+        <div className="absolute top-0 left-0 right-0 h-[70vh] z-0">
+          <Suspense fallback={<div className="w-full h-full bg-black animate-pulse" />}>
+            {/* @ts-ignore */}
+            <spline-viewer 
+              url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" 
+              events-target="global"
+            />
           </Suspense>
+          {/* Gradient overlay to fade Spline into black */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black pointer-events-none" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 w-full relative z-10 pointer-events-none">
+        <div className="relative z-10 text-center px-6 mt-[20vh]">
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-2xl pointer-events-auto"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-bold mb-8 backdrop-blur-sm">
-              <Sparkles size={16} />
-              <span>AI-Powered Career Intelligence</span>
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center text-black">
+                <Zap size={40} fill="currentColor" />
+              </div>
             </div>
-            <h1 className="text-7xl md:text-9xl font-black tracking-tighter text-text-primary mb-8 leading-[0.85]">
-              THE FUTURE <br />
-              OF <span className="text-primary">TALENT.</span>
+            
+            <h1 className="text-7xl md:text-[160px] font-black tracking-tighter leading-[0.8] mb-8">
+              NEXUS<span className="text-primary">26</span>
             </h1>
-            <p className="text-xl text-text-muted mb-12 max-w-lg leading-relaxed">
-              NexusAI bridges the gap between talent, education, and industry using advanced 3D career mapping and predictive intelligence.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center gap-4">
+
+            <div className="space-y-4 mb-12">
+              <p className="text-xl md:text-2xl font-bold tracking-tight text-white/90">
+                Starting on June 10th, 2026
+              </p>
+              <p className="text-lg text-white/50 max-w-xl mx-auto leading-relaxed">
+                Unlock the future of career intelligence. Join us at NEXUS26 where talent meets predictive AI.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/login">
-                <Button size="lg" className="w-full sm:w-auto px-10">
-                  Launch Platform <ArrowRight className="ml-2" size={20} />
-                </Button>
+                <button className="bg-white text-black px-10 py-4 rounded-full text-lg font-bold hover:scale-105 transition-transform">
+                  Accept Invite
+                </button>
               </Link>
-              <Button variant="outline" size="lg" className="w-full sm:w-auto bg-white/50 backdrop-blur-sm">
-                Watch Demo
-              </Button>
+              <button className="bg-white/10 backdrop-blur-xl border border-white/10 text-white px-10 py-4 rounded-full text-lg font-bold hover:bg-white/20 transition-all">
+                Double It & Pass
+              </button>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Interactive 3D Feature Section */}
-      <section className="py-32 bg-text-primary text-white overflow-hidden">
+      {/* Feature Grid - Minimalist & Dark */}
+      <section className="py-40 bg-black relative z-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-3 gap-1px bg-white/10 border border-white/10 rounded-[40px] overflow-hidden">
+            {[
+              { title: "AI Core", desc: "Predictive matching with 99% accuracy.", icon: Zap },
+              { title: "Global Sync", desc: "Real-time industry integration.", icon: Globe },
+              { title: "Secure ID", desc: "Blockchain-verified talent credentials.", icon: Shield }
+            ].map((item, i) => (
+              <div key={i} className="bg-black p-12 hover:bg-white/[0.02] transition-colors group">
+                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-primary mb-8 group-hover:scale-110 transition-transform">
+                  <item.icon size={24} />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
+                <p className="text-white/40 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive 3D Feature Section - Dark Mode */}
+      <section className="py-40 bg-black overflow-hidden relative">
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
-          <div className="relative h-[500px] rounded-3xl overflow-hidden border border-white/10 group">
+          <div className="relative h-[600px] rounded-[40px] overflow-hidden border border-white/10 bg-white/[0.02] group">
             <Suspense fallback={<div className="w-full h-full bg-white/5 animate-pulse" />}>
-              <Spline scene="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
+              {/* @ts-ignore */}
+              <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
             </Suspense>
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-text-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
-              <p className="text-sm font-medium text-gray-300">Interact with the AI Core to explore skill clusters.</p>
-            </div>
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black via-transparent to-transparent" />
           </div>
           
-          <div className="space-y-8">
-            <h2 className="text-5xl font-black tracking-tight leading-tight">
-              Interactive <span className="text-secondary">Skill Mapping.</span>
+          <div className="space-y-10">
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-[0.9]">
+              INTERACTIVE <br />
+              <span className="text-primary">SKILL MAPPING.</span>
             </h2>
-            <p className="text-xl text-gray-400 leading-relaxed">
+            <p className="text-xl text-white/50 leading-relaxed max-w-lg">
               Our 3D engine visualizes your career path in real-time. See how every skill you acquire opens new dimensions of opportunity.
             </p>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { title: "Real-time Sync", desc: "Instantly updates as you learn." },
-                { title: "3D Visualization", desc: "Explore roles in 3D space." },
-                { title: "Predictive Paths", desc: "AI-driven career forecasting." },
-                { title: "Global Benchmarks", desc: "Compare with world leaders." }
-              ].map((item, i) => (
-                <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                  <h4 className="font-bold text-secondary mb-1">{item.title}</h4>
-                  <p className="text-xs text-gray-500">{item.desc}</p>
+                "Real-time Sync",
+                "3D Visualization",
+                "Predictive Paths",
+                "Global Benchmarks"
+              ].map((text, i) => (
+                <div key={i} className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(124,77,255,0.8)]" />
+                  <span className="text-sm font-bold text-white/80">{text}</span>
                 </div>
               ))}
             </div>
@@ -103,57 +138,22 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="py-20 border-t border-border">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-sm font-bold text-text-muted uppercase tracking-widest mb-12">Trusted by industry leaders</p>
-          <div className="flex flex-wrap justify-center gap-12 opacity-40 grayscale">
-            {['Google', 'Microsoft', 'Amazon', 'Meta', 'Netflix'].map(brand => (
-              <span key={brand} className="text-3xl font-black tracking-tighter">{brand}</span>
-            ))}
+      {/* Footer - Minimalist */}
+      <footer className="bg-black border-t border-white/5 py-20">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-white rounded flex items-center justify-center text-black font-bold italic text-sm">N</div>
+            <span className="text-lg font-black tracking-tighter">NEXUS<span className="text-primary">AI</span></span>
           </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-text-primary text-white py-20">
-        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">
-          <div className="col-span-2">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold italic">N</div>
-              <span className="text-xl font-black tracking-tighter">NEXUS<span className="text-primary">AI</span></span>
-            </div>
-            <p className="text-gray-400 max-w-sm mb-8">
-              Building the infrastructure for the next generation of global talent.
-            </p>
-            <div className="flex gap-4">
-              {/* Social icons placeholder */}
-              <div className="w-10 h-10 rounded-full bg-white/10"></div>
-              <div className="w-10 h-10 rounded-full bg-white/10"></div>
-              <div className="w-10 h-10 rounded-full bg-white/10"></div>
-            </div>
+          <div className="flex gap-8 text-[12px] font-bold text-white/40 uppercase tracking-widest">
+            <a href="#" className="hover:text-white transition-colors">Privacy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms</a>
+            <a href="#" className="hover:text-white transition-colors">Cookies</a>
+            <a href="#" className="hover:text-white transition-colors">Contact</a>
           </div>
-          <div>
-            <h4 className="font-bold mb-6">Product</h4>
-            <ul className="space-y-4 text-gray-400 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Integrations</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Enterprise</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Solutions</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-6">Company</h4>
-            <ul className="space-y-4 text-gray-400 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-6 pt-20 mt-20 border-t border-white/10 text-center text-gray-500 text-xs">
-          © 2026 NexusAI Technologies Inc. All rights reserved.
+          <p className="text-[12px] text-white/20 font-medium">
+            © 2026 NexusAI Technologies Inc.
+          </p>
         </div>
       </footer>
     </div>

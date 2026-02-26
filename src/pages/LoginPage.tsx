@@ -1,8 +1,10 @@
-import React, { useState, Suspense } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { GraduationCap, Briefcase, Building2, ArrowRight } from 'lucide-react';
 import { Button } from '../components/UI';
+
+const Spline = lazy(() => import('@splinetool/react-spline'));
 
 export const LoginPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<'student' | 'college' | 'recruiter' | null>(null);
@@ -25,11 +27,7 @@ export const LoginPage: React.FC = () => {
       {/* Background 3D */}
       <div className="absolute inset-0 z-0 opacity-40">
         <Suspense fallback={null}>
-          {/* @ts-ignore */}
-          <spline-viewer 
-            url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" 
-            events-target="global"
-          />
+          <Spline scene="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
         </Suspense>
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black pointer-events-none" />
       </div>

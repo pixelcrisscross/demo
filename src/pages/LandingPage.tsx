@@ -1,8 +1,10 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Sparkles, ArrowRight, Zap, Globe, Shield } from 'lucide-react';
 import { Button } from '../components/UI';
+
+const Spline = lazy(() => import('@splinetool/react-spline'));
 
 export const LandingPage: React.FC = () => {
   return (
@@ -29,20 +31,18 @@ export const LandingPage: React.FC = () => {
 
       {/* Hero */}
       <section className="relative min-h-screen flex flex-col items-center justify-center pt-20">
-        {/* Spline Background - Positioned at top like the reference image */}
-        <div className="absolute top-0 left-0 right-0 h-[70vh] z-0">
+        {/* Spline Background */}
+        <div className="absolute inset-0 z-0">
           <Suspense fallback={<div className="w-full h-full bg-black animate-pulse" />}>
-            {/* @ts-ignore */}
-            <spline-viewer 
-              url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" 
-              events-target="global"
+            <Spline 
+              scene="https://prod.spline.design/Z9TXn2mrWvQ4b0op/scene.splinecode" 
             />
           </Suspense>
           {/* Gradient overlay to fade Spline into black */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black pointer-events-none" />
         </div>
 
-        <div className="relative z-10 text-center px-6 mt-[20vh]">
+        <div className="relative z-10 text-center px-6 mt-[10vh]">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -107,8 +107,7 @@ export const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
           <div className="relative h-[600px] rounded-[40px] overflow-hidden border border-white/10 bg-white/[0.02] group">
             <Suspense fallback={<div className="w-full h-full bg-white/5 animate-pulse" />}>
-              {/* @ts-ignore */}
-              <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
+              <Spline scene="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
             </Suspense>
             <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black via-transparent to-transparent" />
           </div>

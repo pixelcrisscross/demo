@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { 
   TrendingUp, 
   Briefcase, 
@@ -25,6 +25,8 @@ import {
 import { StatCard, Button } from '../components/UI';
 import { AIChatPanel } from '../components/AIChatPanel';
 import { mockJobs } from '../mockData';
+
+const Spline = lazy(() => import('@splinetool/react-spline'));
 
 const chartData = [
   { name: 'Jan', score: 65 },
@@ -74,8 +76,7 @@ export const StudentDashboard: React.FC = () => {
         {/* 3D Interactive Element */}
         <div className="absolute right-0 top-0 bottom-0 w-1/3 hidden lg:block pointer-events-auto">
           <Suspense fallback={<div className="w-full h-full bg-white/5 animate-pulse" />}>
-            {/* @ts-ignore */}
-            <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
+            <Spline scene="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
           </Suspense>
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/20 pointer-events-none" />
         </div>

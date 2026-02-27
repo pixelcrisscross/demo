@@ -25,13 +25,9 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 relative overflow-hidden selection:bg-primary/30">
       {/* Background 3D */}
-      <div className="absolute inset-0 z-0 opacity-40">
+      <div className="absolute inset-0 z-0 opacity-60">
         <Suspense fallback={null}>
-          {/* @ts-ignore */}
-          <spline-viewer 
-            url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" 
-            events-target="global"
-          />
+          <Spline scene="https://prod.spline.design/z4Ct9MyrfGA-ubxx/scene.splinecode" />
         </Suspense>
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black pointer-events-none" />
       </div>

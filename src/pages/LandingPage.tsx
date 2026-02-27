@@ -1,10 +1,62 @@
 import React, { Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
 import { Sparkles, ArrowRight, Zap, Globe, Shield } from 'lucide-react';
 import { Button } from '../components/UI';
 
 const Spline = lazy(() => import('@splinetool/react-spline'));
+
+const TiltCard = ({ children }: { children: React.ReactNode }) => {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x);
+  const mouseYSpring = useSpring(y);
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateY,
+        rotateX,
+        transformStyle: "preserve-3d",
+      }}
+      className="relative h-full w-full rounded-[40px] bg-white/[0.03] border border-white/10 p-12 overflow-hidden group backdrop-blur-sm"
+    >
+      <div
+        style={{
+          transform: "translateZ(50px)",
+          transformStyle: "preserve-3d",
+        }}
+      >
+        {children}
+      </div>
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+    </motion.div>
+  );
+};
 
 export const LandingPage: React.FC = () => {
   return (
@@ -42,6 +94,8 @@ export const LandingPage: React.FC = () => {
           </Suspense>
           {/* Gradient overlay to fade Spline into black */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black pointer-events-none" />
+          {/* Watermark Hider */}
+          <div className="absolute bottom-0 right-0 w-48 h-12 bg-black z-10 pointer-events-none" />
         </div>
 
         <div className="relative z-10 text-center px-6 mt-[10vh]">
@@ -83,21 +137,40 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Feature Grid - Minimalist & Dark */}
-      <section className="py-40 bg-black relative z-10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-1px bg-white/10 border border-white/10 rounded-[40px] overflow-hidden">
+      {/* Feature Grid - Individual Tilt Cards */}
+      <section className="py-40 bg-black relative z-10 overflow-hidden">
+        {/* Spline Background for this section */}
+        <div className="absolute inset-0 z-0 opacity-50">
+          <Suspense fallback={null}>
+            {/* @ts-ignore */}
+            <spline-viewer 
+              url="https://prod.spline.design/h-9i43PKXqJc8KoD/scene.splinecode" 
+              events-target="global"
+            />
+          </Suspense>
+          <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none" />
+          {/* Watermark Hider */}
+          <div className="absolute bottom-0 right-0 w-48 h-12 bg-black z-10 pointer-events-none" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="grid md:grid-cols-3 gap-8">
             {[
               { title: "AI Core", desc: "Predictive matching with 99% accuracy.", icon: Zap },
               { title: "Global Sync", desc: "Real-time industry integration.", icon: Globe },
               { title: "Secure ID", desc: "Blockchain-verified talent credentials.", icon: Shield }
             ].map((item, i) => (
-              <div key={i} className="bg-black p-12 hover:bg-white/[0.02] transition-colors group">
-                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-primary mb-8 group-hover:scale-110 transition-transform">
-                  <item.icon size={24} />
-                </div>
-                <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
-                <p className="text-white/40 leading-relaxed">{item.desc}</p>
+              <div key={i} className="h-[400px]">
+                <TiltCard>
+                  <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-primary mb-8 group-hover:scale-110 transition-transform group-hover:shadow-[0_0_20px_rgba(124,77,255,0.3)]">
+                    <item.icon size={24} />
+                  </div>
+                  <h3 className="text-3xl font-black mb-4 tracking-tighter uppercase">{item.title}</h3>
+                  <p className="text-white/40 leading-relaxed text-lg">{item.desc}</p>
+                  
+                  {/* Decorative background element */}
+                  <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-all duration-500" />
+                </TiltCard>
               </div>
             ))}
           </div>
@@ -114,6 +187,8 @@ export const LandingPage: React.FC = () => {
                 {/* @ts-ignore */}
                 <spline-viewer url="https://prod.spline.design/4kE4lSCFZIvqfAyK/scene.splinecode" />
               </Suspense>
+              {/* Watermark Hider */}
+              <div className="absolute bottom-0 right-0 w-48 h-12 bg-black z-10 pointer-events-none" />
             </div>
             
             {/* Grain Overlay */}

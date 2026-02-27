@@ -30,6 +30,8 @@ export const LoginPage: React.FC = () => {
           <Spline scene="https://prod.spline.design/z4Ct9MyrfGA-ubxx/scene.splinecode" />
         </Suspense>
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black pointer-events-none" />
+        {/* Watermark Hider */}
+        <div className="absolute bottom-0 right-0 w-48 h-12 bg-black z-10 pointer-events-none" />
       </div>
 
       <div className="max-w-5xl w-full grid lg:grid-cols-2 gap-20 items-center relative z-10">

@@ -80,6 +80,8 @@ export const StudentDashboard: React.FC = () => {
             <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
           </Suspense>
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black/20 pointer-events-none" />
+          {/* Watermark Hider */}
+          <div className="absolute bottom-0 right-0 w-48 h-12 bg-black z-10 pointer-events-none" />
         </div>
       </div>
 

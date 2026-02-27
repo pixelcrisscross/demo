@@ -107,12 +107,39 @@ export const LandingPage: React.FC = () => {
       {/* Interactive 3D Feature Section - Dark Mode */}
       <section className="py-40 bg-black overflow-hidden relative">
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
-          <div className="relative h-[600px] rounded-[40px] overflow-hidden border border-white/10 bg-white/[0.02] group">
-            <Suspense fallback={<div className="w-full h-full bg-white/5 animate-pulse" />}>
-              {/* @ts-ignore */}
-              <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyVuC8u6j/scene.splinecode" />
-            </Suspense>
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-black via-transparent to-transparent" />
+          <div className="relative h-[600px] rounded-[40px] overflow-hidden border border-white/10 bg-black group flex items-center justify-center">
+            {/* Spline Background */}
+            <div className="absolute inset-0 z-0">
+              <Suspense fallback={<div className="w-full h-full bg-white/5 animate-pulse" />}>
+                {/* @ts-ignore */}
+                <spline-viewer url="https://prod.spline.design/4kE4lSCFZIvqfAyK/scene.splinecode" />
+              </Suspense>
+            </div>
+            
+            {/* Grain Overlay */}
+            <div className="absolute inset-0 z-10 opacity-40 pointer-events-none mix-blend-soft-light">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 700" width="100%" height="100%" className="w-full h-full">
+                <defs>
+                  <filter id="nnnoise-filter" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox" primitiveUnits="userSpaceOnUse" colorInterpolationFilters="linearRGB">
+                    <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="4" seed="15" stitchTiles="stitch" x="0%" y="0%" width="100%" height="100%" result="turbulence"></feTurbulence>
+                    <feSpecularLighting surfaceScale="15" specularConstant="1.1" specularExponent="20" lightingColor="#ffffff" x="0%" y="0%" width="100%" height="100%" in="turbulence" result="specularLighting">
+                      <feDistantLight azimuth="3" elevation="91"></feDistantLight>
+                    </feSpecularLighting>
+                  </filter>
+                </defs>
+                <rect width="100%" height="100%" fill="#000000ff"></rect>
+                <rect width="700" height="700" fill="#ffffff" filter="url(#nnnoise-filter)"></rect>
+              </svg>
+            </div>
+
+            {/* Card Info Overlay */}
+            <div className="relative z-20 p-12 flex flex-col items-center text-center bg-black/20 backdrop-blur-sm rounded-3xl border border-white/5 m-8">
+              <h3 className="text-3xl font-black tracking-tighter mb-4">Experience the Future</h3>
+              <p className="text-white/60 mb-8 max-w-xs">Embrace the possibilities and redefine what's possible.</p>
+              <a href="#" className="bg-white text-black px-8 py-3 rounded-full font-bold text-sm hover:scale-105 transition-transform">
+                Learn more
+              </a>
+            </div>
           </div>
           
           <div className="space-y-10">

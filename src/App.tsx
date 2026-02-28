@@ -32,9 +32,19 @@ export default function App() {
             <CollegeDashboard />
           </DashboardLayout>
         } />
+        <Route path="/college/:tab" element={
+          <DashboardLayout>
+            <CollegeDashboard />
+          </DashboardLayout>
+        } />
 
         {/* Recruiter Routes */}
         <Route path="/recruiter" element={
+          <DashboardLayout>
+            <RecruiterDashboard />
+          </DashboardLayout>
+        } />
+        <Route path="/recruiter/:tab" element={
           <DashboardLayout>
             <RecruiterDashboard />
           </DashboardLayout>

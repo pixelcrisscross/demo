@@ -1,27 +1,42 @@
 import React, { useState } from 'react';
-import { Send, Sparkles, User, Bot } from 'lucide-react';
+import { Send, Sparkles, User, Bot, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { GoogleGenAI } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export const AIChatPanel: React.FC = () => {
   const [messages, setMessages] = useState([
     { role: 'bot', content: "Hello! I'm your NexusAI assistant. How can I help with your career today?" }
   ]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
     
     const userMsg = { role: 'user', content: input };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
+    setIsLoading(true);
 
-    // Simulate bot response
-    setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: 'bot', 
-        content: "That's a great question! Based on your profile, I'd recommend focusing on your React skills for the upcoming TechFlow interview." 
-      }]);
-    }, 1000);
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: input,
+        config: {
+          systemInstruction: "You are NexusAI, a premium career coach assistant. You help students with job matching, resume optimization, and interview prep. Keep responses concise, professional, and insightful.",
+        }
+      });
+
+      const botMsg = { role: 'bot', content: response.text || "I'm sorry, I couldn't process that request." };
+      setMessages(prev => [...prev, botMsg]);
+    } catch (err) {
+      console.error('AI Error:', err);
+      setMessages(prev => [...prev, { role: 'bot', content: "I'm having trouble connecting to my intelligence core right now. Please try again later." }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -70,9 +85,10 @@ export const AIChatPanel: React.FC = () => {
           />
           <button 
             onClick={handleSend}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 text-primary hover:bg-primary/10 rounded-xl transition-all"
+            disabled={isLoading}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 text-primary hover:bg-primary/10 rounded-xl transition-all disabled:opacity-50"
           >
-            <Send size={20} />
+            {isLoading ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
           </button>
         </div>
       </div>

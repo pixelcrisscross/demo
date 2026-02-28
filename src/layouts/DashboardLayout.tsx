@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -11,7 +11,8 @@ import {
   Menu
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { mockUser } from '../mockData';
+import { userService } from '../services/api';
+import { auth } from '../lib/firebase';
 
 interface SidebarItemProps {
   icon: any;
@@ -37,7 +38,32 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon: Icon, label, path, acti
 export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [profile, setProfile] = useState<any>(null);
   const role = location.pathname.split('/')[1] || 'student';
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const res = await userService.getProfile(user.uid);
+          setProfile(res.data);
+        } catch (err) {
+          console.error('Failed to fetch profile', err);
+        }
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      navigate('/login');
+    } catch (err) {
+      console.error('Failed to logout', err);
+    }
+  };
 
   const menuItems = {
     student: [
@@ -80,7 +106,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         <div className="p-6 border-t border-white/5">
           <SidebarItem icon={Settings} label="Settings" path={`/${role}/settings`} />
           <button 
-            onClick={() => navigate('/')}
+            onClick={handleLogout}
             className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-red-400 hover:bg-red-400/10 transition-all duration-300 mt-2"
           >
             <LogOut size={20} />
@@ -115,14 +141,12 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
             <div className="h-8 w-[1px] bg-white/5 mx-2"></div>
             <div className="flex items-center gap-4">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-black tracking-tight">{mockUser.name}</p>
+                <p className="text-sm font-black tracking-tight">{profile?.name || 'User'}</p>
                 <p className="text-[10px] text-primary uppercase font-black tracking-widest mt-1">{role}</p>
               </div>
-              <img 
-                src={mockUser.avatar} 
-                alt="Profile" 
-                className="w-11 h-11 rounded-2xl object-cover border border-white/10 p-0.5"
-              />
+              <div className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center font-black text-primary">
+                {profile?.name?.[0] || '?'}
+              </div>
             </div>
           </div>
         </header>

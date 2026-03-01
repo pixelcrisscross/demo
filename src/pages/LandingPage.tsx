@@ -119,7 +119,7 @@ export const LandingPage: React.FC = () => {
                 Starting on June 10th, 2026
               </p>
               <p className="text-lg text-white/50 max-w-xl mx-auto leading-relaxed">
-                Unlock the future of career intelligence. Join us at NEXUS26 where talent meets predictive AI.
+                Unlock the future of career intelligence. NEXUSAI where talent meets predictive AI.
               </p>
             </div>
 

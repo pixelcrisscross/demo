@@ -19,4 +19,5 @@ export const userService = {
   create: (userData: any) => api.post('/users', userData),
   update: (uid: string, userData: any) => api.put(`/users/${uid}`, userData),
   getCollegeStudents: (collegeId: string) => api.get(`/colleges/${collegeId}/students`),
+  getRecruiterApplications: (uid: string) => api.get(`/recruiter/${uid}/applications`),
 };

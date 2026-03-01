@@ -94,20 +94,29 @@ export const StudentDashboard: React.FC = () => {
       setJobs((prev) => [newJob, ...prev]);
     });
 
+    socket.on('job:updated', (updatedJob) => {
+      setJobs((prev) => prev.map(j => (j._id === updatedJob._id || j.id === updatedJob.id) ? updatedJob : j));
+    });
+
     socket.on('job:deleted', (jobId) => {
-      setJobs((prev) => prev.filter(j => j._id !== jobId));
+      setJobs((prev) => prev.filter(j => j._id !== jobId && j.id !== jobId));
     });
 
     return () => {
       socket.off('job:created');
+      socket.off('job:updated');
       socket.off('job:deleted');
     };
   }, []);
 
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const hasApplied = (jobId: string) => {
+    return student?.applications?.some((app: any) => app.jobId === jobId);
+  };
+
   const handleApply = async (job: any) => {
-    const jobId = job._id || job.id;
+    const jobId = (job._id || job.id)?.toString();
     if (!jobId || isProcessing) return;
     const user = auth.currentUser;
     if (!user) return;
@@ -357,11 +366,15 @@ export const StudentDashboard: React.FC = () => {
             </div>
 
             <button 
-              disabled={isProcessing}
+              disabled={isProcessing || hasApplied(job._id || job.id)}
               onClick={() => handleApply(job)}
-              className="w-full bg-white/5 border border-white/10 text-white py-4 rounded-full font-black text-sm hover:bg-white hover:text-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full py-4 rounded-full font-black text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                hasApplied(job._id || job.id) 
+                  ? 'bg-secondary/20 text-secondary border border-secondary/20' 
+                  : 'bg-white/5 border border-white/10 text-white hover:bg-white hover:text-black'
+              }`}
             >
-              {isProcessing ? 'Processing...' : 'Apply Now'}
+              {isProcessing ? 'Processing...' : hasApplied(job._id || job.id) ? 'Applied' : 'Apply Now'}
             </button>
           </motion.div>
         ))}

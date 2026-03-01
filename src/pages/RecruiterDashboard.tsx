@@ -24,16 +24,17 @@ import { jobService, userService } from '../services/api';
 import { socket } from '../services/socket';
 import { auth } from '../lib/firebase';
 
-const pipelineStages = [
-  { name: 'Applied', count: 124, color: 'bg-blue-500' },
-  { name: 'Screening', count: 45, color: 'bg-purple-500' },
-  { name: 'Interview', count: 12, color: 'bg-orange-500' },
-  { name: 'Offer', count: 4, color: 'bg-green-500' },
-];
-
 export const RecruiterDashboard: React.FC = () => {
   const { tab } = useParams();
   const [jobs, setJobs] = useState<any[]>([]);
+  const [applications, setApplications] = useState<any[]>([]);
+
+  const getPipelineStages = () => [
+    { name: 'Applied', count: applications.filter(a => a.status === 'Applied').length, color: 'bg-blue-500' },
+    { name: 'Screening', count: applications.filter(a => a.status === 'Screening').length, color: 'bg-purple-500' },
+    { name: 'Interview', count: applications.filter(a => a.status === 'Interview').length, color: 'bg-orange-500' },
+    { name: 'Offer', count: applications.filter(a => a.status === 'Offer').length, color: 'bg-green-500' },
+  ];
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,12 +58,14 @@ export const RecruiterDashboard: React.FC = () => {
     const user = auth.currentUser;
     if (!user) return;
     try {
-      const [jobsRes, profileRes] = await Promise.all([
+      const [jobsRes, profileRes, appsRes] = await Promise.all([
         jobService.getAll(),
-        userService.getProfile(user.uid)
+        userService.getProfile(user.uid),
+        userService.getRecruiterApplications(user.uid)
       ]);
       setJobs(jobsRes.data);
       setProfile(profileRes.data);
+      setApplications(appsRes.data);
       setNewJob(prev => ({ ...prev, recruiterId: user.uid }));
     } catch (err) {
       console.error('Failed to fetch recruiter data', err);
@@ -86,10 +89,25 @@ export const RecruiterDashboard: React.FC = () => {
       setJobs((prev) => prev.filter(j => (j._id !== jobId && j.id !== jobId)));
     });
 
+    socket.on('job:applied', ({ jobId }) => {
+      setJobs((prev) => prev.map(j => {
+        if (j._id === jobId || j.id === jobId) {
+          return { ...j, applicants: (j.applicants || 0) + 1 };
+        }
+        return j;
+      }));
+      // Refresh applications list
+      const user = auth.currentUser;
+      if (user) {
+        userService.getRecruiterApplications(user.uid).then(res => setApplications(res.data));
+      }
+    });
+
     return () => {
       socket.off('job:created');
       socket.off('job:updated');
       socket.off('job:deleted');
+      socket.off('job:applied');
     };
   }, []);
 
@@ -101,7 +119,8 @@ export const RecruiterDashboard: React.FC = () => {
         skillsRequired: newJob.skillsRequired.split(',').map(s => s.trim())
       };
       if (editingJob) {
-        await jobService.update(editingJob._id || editingJob.id, jobData);
+        const id = (editingJob._id || editingJob.id).toString();
+        await jobService.update(id, jobData);
       } else {
         await jobService.create(jobData);
       }
@@ -148,8 +167,12 @@ export const RecruiterDashboard: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleDeleteJob = async (job: any) => {
-    const id = job._id || job.id;
-    if (!id || isProcessing) return;
+    const id = (job._id || job.id)?.toString();
+    if (!id) {
+      alert('Error: Job ID not found. Cannot delete.');
+      return;
+    }
+    if (isProcessing) return;
     if (window.confirm(`Are you sure you want to delete "${job.title}"?`)) {
       setIsProcessing(true);
       try {
@@ -197,9 +220,9 @@ export const RecruiterDashboard: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { title: "Active Jobs", value: jobs.length, icon: Briefcase, color: "text-primary" },
-          { title: "Total Candidates", value: "185", change: "+24", icon: Users, color: "text-blue-400" },
-          { title: "Interviews Today", value: "5", icon: Calendar, color: "text-orange-400" },
-          { title: "Hires this Month", value: "12", change: "+2", icon: Plus, color: "text-secondary" }
+          { title: "Total Candidates", value: applications.length, change: applications.length > 0 ? `+${applications.length}` : null, icon: Users, color: "text-blue-400" },
+          { title: "Interviews Today", value: "0", icon: Calendar, color: "text-orange-400" },
+          { title: "Hires this Month", value: "0", icon: Plus, color: "text-secondary" }
         ].map((stat, i) => (
           <div key={i} className="bg-white/[0.03] p-8 rounded-[32px] border border-white/10 backdrop-blur-xl">
             <div className="flex justify-between items-start mb-4">
@@ -221,20 +244,33 @@ export const RecruiterDashboard: React.FC = () => {
               <h3 className="font-black text-xl tracking-tighter uppercase">Recent Applications</h3>
             </div>
             <div className="divide-y divide-white/5">
-              {[1, 2, 3].map((_, i) => (
-                <div key={i} className="p-8 hover:bg-white/[0.02] transition-colors flex items-center justify-between group cursor-pointer">
-                  <div className="flex items-center gap-6">
-                    <img src={`https://picsum.photos/seed/${i}/200`} className="w-14 h-14 rounded-2xl object-cover" />
-                    <div>
-                      <h4 className="font-black text-lg group-hover:text-primary transition-colors tracking-tight">Candidate {i + 1}</h4>
-                      <p className="text-[10px] text-white/30 mt-2 font-black uppercase tracking-widest">Applied for Senior React Developer</p>
+              {applications.length > 0 ? (
+                applications.slice(0, 5).map((app, i) => (
+                  <div key={i} className="p-8 hover:bg-white/[0.02] transition-colors flex items-center justify-between group cursor-pointer">
+                    <div className="flex items-center gap-6">
+                      <img src={app.userPhoto} className="w-14 h-14 rounded-2xl object-cover" />
+                      <div>
+                        <h4 className="font-black text-lg group-hover:text-primary transition-colors tracking-tight">{app.userName}</h4>
+                        <p className="text-[10px] text-white/30 mt-2 font-black uppercase tracking-widest">
+                          Applied for {jobs.find(j => (j._id === app.jobId || j.id === app.jobId))?.title || 'Job'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white/20">
+                        {new Date(app.appliedAt).toLocaleDateString()}
+                      </span>
+                      <button className="p-4 bg-white/5 rounded-2xl hover:bg-primary transition-all">
+                        <ChevronRight size={20} />
+                      </button>
                     </div>
                   </div>
-                  <button className="p-4 bg-white/5 rounded-2xl hover:bg-primary transition-all">
-                    <ChevronRight size={20} />
-                  </button>
+                ))
+              ) : (
+                <div className="p-20 text-center">
+                  <p className="text-white/20 font-black uppercase tracking-widest">No applications yet</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -243,7 +279,7 @@ export const RecruiterDashboard: React.FC = () => {
           <div className="bg-white/[0.03] p-8 rounded-[40px] border border-white/10 backdrop-blur-xl">
             <h3 className="font-black text-xl tracking-tighter uppercase mb-10">Pipeline Overview</h3>
             <div className="space-y-8">
-              {pipelineStages.map((stage) => (
+              {getPipelineStages().map((stage) => (
                 <div key={stage.name}>
                   <div className="flex justify-between items-end mb-3">
                     <span className="text-[10px] font-black uppercase tracking-widest text-white/40">{stage.name}</span>
@@ -252,7 +288,7 @@ export const RecruiterDashboard: React.FC = () => {
                   <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                     <motion.div 
                       initial={{ width: 0 }}
-                      animate={{ width: `${(stage.count / 185) * 100}%` }}
+                      animate={{ width: applications.length > 0 ? `${(stage.count / applications.length) * 100}%` : '0%' }}
                       transition={{ duration: 1, ease: "easeOut" }}
                       className={`h-full rounded-full ${stage.color}`}
                     />

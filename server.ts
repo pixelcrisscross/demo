@@ -122,17 +122,27 @@ async function startServer() {
   app.get('/api/jobs', async (req, res) => {
     try {
       if (isUsingMongoDB) {
-        const jobs = await Job.find().sort({ postedAt: -1 });
-        return res.json(jobs);
+        const jobs = await Job.find().sort({ postedAt: -1 }).lean();
+        const enrichedJobs = await Promise.all(jobs.map(async (job: any) => {
+          const applicantCount = await User.countDocuments({ 'applications.jobId': job._id.toString() });
+          return { ...job, applicants: applicantCount };
+        }));
+        res.json(enrichedJobs);
       } else {
         const jobs = db.prepare('SELECT * FROM jobs ORDER BY postedAt DESC').all() as any[];
-        res.json(jobs.map(j => ({ 
-          ...j, 
-          _id: j.id,
-          skillsRequired: j.skillsRequired ? j.skillsRequired.split(',') : []
-        })));
+        const enrichedJobs = jobs.map(j => {
+          const applicantCount = db.prepare('SELECT COUNT(*) as count FROM applications WHERE jobId = ?').get(j.id) as any;
+          return { 
+            ...j, 
+            _id: j.id,
+            applicants: applicantCount?.count || 0,
+            skillsRequired: j.skillsRequired ? j.skillsRequired.split(',') : []
+          };
+        });
+        res.json(enrichedJobs);
       }
     } catch (err) {
+      console.error('Fetch jobs error:', err);
       res.status(500).json({ error: 'Failed to fetch jobs' });
     }
   });
@@ -179,14 +189,30 @@ async function startServer() {
 
   app.delete('/api/jobs/:id', async (req, res) => {
     try {
+      const jobId = req.params.id;
+      console.log(`[DELETE] Attempting to delete job: ${jobId}`);
+      
       if (isUsingMongoDB) {
-        await Job.findByIdAndDelete(req.params.id);
+        const result = await Job.findByIdAndDelete(jobId);
+        console.log(`[DELETE] MongoDB result:`, result);
+        if (!result) {
+          console.log(`[DELETE] Job not found in MongoDB: ${jobId}`);
+        }
       } else {
-        db.prepare('DELETE FROM jobs WHERE id = ?').run(req.params.id);
+        // First check if it exists
+        const exists = db.prepare('SELECT id FROM jobs WHERE id = ?').get(jobId);
+        if (!exists) {
+          console.log(`[DELETE] Job not found in SQLite: ${jobId}`);
+        } else {
+          const result = db.prepare('DELETE FROM jobs WHERE id = ?').run(jobId);
+          console.log(`[DELETE] SQLite result:`, result);
+        }
       }
-      io.emit('job:deleted', req.params.id);
+      
+      io.emit('job:deleted', jobId);
       res.json({ success: true });
     } catch (err) {
+      console.error('[DELETE] Error:', err);
       res.status(500).json({ error: 'Failed to delete job' });
     }
   });
@@ -256,12 +282,15 @@ async function startServer() {
           { uid },
           { $push: { applications: application } }
         );
-        res.json({ success: true });
       } else {
         const stmt = db.prepare('INSERT INTO applications (jobId, uid, status, appliedAt) VALUES (?, ?, ?, ?)');
         stmt.run(jobId, uid, 'Applied', application.appliedAt.toISOString());
-        res.json({ success: true });
       }
+
+      // Emit event to update recruiter dashboard
+      io.emit('job:applied', { jobId, uid });
+      
+      res.json({ success: true });
     } catch (err) {
       console.error('Apply error:', err);
       res.status(500).json({ error: 'Failed to apply for job' });
@@ -298,6 +327,62 @@ async function startServer() {
       }
     } catch (err) {
       res.status(500).json({ error: 'Failed to update job' });
+    }
+  });
+
+  app.get('/api/recruiter/:uid/applications', async (req, res) => {
+    try {
+      const { uid } = req.params;
+      if (isUsingMongoDB) {
+        // Find jobs by this recruiter
+        const recruiterJobs = await Job.find({ recruiterId: uid }).select('_id');
+        const jobIds = recruiterJobs.map(j => j._id.toString());
+        
+        // Find users who applied to these jobs
+        const applicants = await User.find({
+          'applications.jobId': { $in: jobIds }
+        }).lean();
+
+        const recentApps: any[] = [];
+        applicants.forEach(user => {
+          user.applications.forEach((app: any) => {
+            if (jobIds.some(id => id.toString() === app.jobId)) {
+              recentApps.push({
+                userName: user.name,
+                userEmail: user.email,
+                jobId: app.jobId,
+                status: app.status,
+                appliedAt: app.appliedAt,
+                userPhoto: `https://picsum.photos/seed/${user.uid}/200`
+              });
+            }
+          });
+        });
+
+        res.json(recentApps.sort((a, b) => new Date(b.appliedAt).getTime() - new Date(a.appliedAt).getTime()));
+      } else {
+        const recruiterJobs = db.prepare('SELECT id FROM jobs WHERE recruiterId = ?').all(uid) as any[];
+        const jobIds = recruiterJobs.map(j => j.id);
+        
+        if (jobIds.length === 0) return res.json([]);
+
+        const placeholders = jobIds.map(() => '?').join(',');
+        const apps = db.prepare(`
+          SELECT a.*, u.name as userName, u.email as userEmail, u.uid as userUid
+          FROM applications a
+          JOIN users u ON a.uid = u.uid
+          WHERE a.jobId IN (${placeholders})
+          ORDER BY a.appliedAt DESC
+        `).all(...jobIds) as any[];
+
+        res.json(apps.map(a => ({
+          ...a,
+          userPhoto: `https://picsum.photos/seed/${a.userUid}/200`
+        })));
+      }
+    } catch (err) {
+      console.error('Fetch recruiter applications error:', err);
+      res.status(500).json({ error: 'Failed to fetch applications' });
     }
   });
 
